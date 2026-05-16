@@ -4884,51 +4884,50 @@ function renderDevNote() {
   const card = document.getElementById('devNoteCard');
   if (!card) return;
 
-  // 기본 Dev Note — 배포 시 자동 설정
+  // 오송생명교회 — 사용 가이드 안내문
   const DEFAULT_NOTE = {
-    version: 'v0.7.23',
-    content: `📱 v0.7.23 업데이트 (2026-05-10)
+    version: '사용 가이드',
+    content: `안녕하세요! 오송생명교회 워십매니저입니다 🙏
 
-👑 역할 4단계
-슈퍼관리자 · 관리자 · 워십리더 · 멤버로 권한이 나뉘어요.
-멤버 관리에서 역할 변경 가능하고, 변경 시 본인에게 알림이 가요.
+📖 사용 순서
 
-🎵 악보 창고
-✏️ 수정 버튼 추가 / 파일 2개 동시 업로드 / 15개씩 페이지 나눔
-악보 뷰어 상단 ▶ 유튜브 버튼 추가
+🎵 Step 1 — 악보 창고 채우기
+찬양팀이 자주 사용하는 악보를 등록해요.
+악보 창고 → + 악보 추가 → 파일(PDF/이미지) + 곡명 + Key 입력 후 저장
 
-📅 콘티 할당
-주차 등록 후 바로 할당 팝업 / 카드 상단 📤 버튼
-할당받은 주차에 🎵 나에게 할당됨 뱃지 표시
+✍️ Step 2 — 콘티 짜기
+등록한 악보로 이번 주 콘티를 구성해요.
+빠른 콘티 짜기 → 악보 클릭해서 추가 → 저장하면 주차별 찬양에 자동 등록
+
+📅 Step 3 — 주차별 찬양 확인
+주차별 찬양 탭에서 등록된 콘티를 팀원에게 할당할 수 있어요.
+카드 우측 상단 📤 버튼으로 팀원에게 알림 전송
+
+👥 Step 4 — 팀원 초대
+멤버 관리 → 계정 생성에서 팀원 계정을 만들어주세요.
+이메일 + 임시 비밀번호를 전달하면 바로 사용 가능해요!
 
 📮 교회 신문고
-상태 변경 (대기중 → 진행중 → 배포완료)
-댓글 기능 / 새 글·댓글 시 관리자 자동 알림
+건의사항이나 기능 요청은 교회 신문고에 남겨주세요.
+관리자가 확인 후 답변드려요.
 
-📋 활동 로그
-멤버 관리 → 활동 로그 탭 (슈퍼관리자 전용)
-악보 추가·삭제·임포트·콘티 등록 시 알림 전송
-
-⚠️ 알아두기
-주차별 찬양은 이 기기에만 저장돼요 (Supabase 연동 예정)
-찬양 추천기는 Gemini API 한도 초과 시 잠시 후 재시도하세요`,
-    updatedAt: '2026-05-10'
+⭐ 자주 쓰는 기능
+• 초성 검색 — ㄴㅇㅈ 로 "나의 주" 검색 가능
+• 악보 뷰어 — 악보 클릭 시 전체화면으로 볼 수 있어요
+• Playlist — 자주 쓰는 악보 모음 폴더 만들기`,
+    updatedAt: '2026-05-16'
   };
 
-  let note = JSON.parse(localStorage.getItem('wm_devnote')||'null');
-  // 저장된 노트가 없거나 버전이 다르면 기본값 사용
-  if (!note || note.version !== DEFAULT_NOTE.version) {
-    note = DEFAULT_NOTE;
-    localStorage.setItem('wm_devnote', JSON.stringify(note));
-  }
-
   card.style.display = 'block';
+  card.style.background = 'linear-gradient(135deg,#ECFDF5,#F0FDF4)';
+  card.style.border = '1px solid #6EE7B7';
+
   const verEl = document.getElementById('devNoteVersion');
   const contentEl = document.getElementById('devNoteContent');
-  if (verEl) verEl.textContent = note.version||'';
-  if (contentEl) contentEl.textContent = note.content;
+  if (verEl) { verEl.textContent = DEFAULT_NOTE.version; verEl.style.background='#6EE7B7'; verEl.style.color='#065F46'; }
+  if (contentEl) { contentEl.textContent = DEFAULT_NOTE.content; contentEl.style.color='#065F46'; }
 
-  // 어드민 편집 버튼
+  // 관리자만 편집 버튼 표시
   const editBtn = card.querySelector('button');
   if (editBtn) editBtn.style.display = isAdmin() ? 'block' : 'none';
 }
