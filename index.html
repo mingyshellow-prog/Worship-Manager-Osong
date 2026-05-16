@@ -2242,7 +2242,7 @@ function updateUserInStorage() {
   saveProfile_sb().catch(()=>{
     // fallback to localStorage
     if (!currentUser || currentUser.id==='guest') return;
-    saveProfile_sb(); // localStorage 대신 Supabase 직접 저장
+    saveProfile_sb();
   });
 }
 
@@ -2301,11 +2301,8 @@ function updateUserUI() {
 // DATA LOAD/SAVE
 // ════════════════════════════════════════════
 async function loadAllData() {
-  // ── Supabase에서 모든 데이터 로드 (localStorage 의존성 제거)
   const cid = currentUser?.church_id;
-
-  // 병렬 로드
-  const [scoresRes, weeklyRes, savedContisRes, annRes, collectionsRes, learningRes] = await Promise.allSettled([
+  await Promise.allSettled([
     loadScoresFromSupabase(),
     loadWeeklyFromSupabase(cid),
     loadSavedContisFromSupabase(cid),
@@ -2313,177 +2310,81 @@ async function loadAllData() {
     loadCollectionsFromSupabase(),
     loadLearningFromSupabase(cid),
   ]);
-
   renderAll();
   renderSuggestions();
 }
 
-// ── Supabase: 주차별 찬양
 async function loadWeeklyFromSupabase(cid) {
   try {
-    const { data, error } = await sb.from('weekly_contis')
-      .select('*')
-      .order('date', { ascending: false });
-    if (error) throw error;
-    weeklyContis = (data || []).map(w => ({
-      id: w.id, date: w.date, service: w.service, title: w.title,
-      practice: w.practice, serviceTime: w.service_time, memo: w.memo,
-      ref: w.ref, contiYt: w.conti_yt, songs: w.songs || [],
-      leader: w.leader, createdAt: w.created_at
-    }));
-  } catch(e) {
-    console.log('[WM] weekly fallback:', e);
-    weeklyContis = [];
-  }
+    const { data } = await sb.from('weekly_contis').select('*').order('date', { ascending: false });
+    weeklyContis = (data||[]).map(w => ({ id:w.id, date:w.date, service:w.service, title:w.title, practice:w.practice, serviceTime:w.service_time, memo:w.memo, ref:w.ref, contiYt:w.conti_yt, songs:w.songs||[], leader:w.leader, createdAt:w.created_at }));
+  } catch(e) { weeklyContis = []; }
 }
 
-// ── Supabase: 주차 저장
 async function saveWeeklyToSupabase(entry) {
-  try {
-    await sb.from('weekly_contis').upsert({
-      id: entry.id,
-      date: entry.date, service: entry.service, title: entry.title || '',
-      practice: entry.practice || '', service_time: entry.serviceTime || '',
-      memo: entry.memo || '', ref: entry.ref || '', conti_yt: entry.contiYt || '',
-      songs: entry.songs || [], leader: entry.leader || '',
-      created_by: currentUser.id
-    }, { onConflict: 'id' });
-  } catch(e) { console.log('[WM] saveWeekly error:', e); showToast('저장 오류: ' + e.message); }
+  try { await sb.from('weekly_contis').upsert({ id:entry.id, date:entry.date, service:entry.service||'', title:entry.title||'', practice:entry.practice||'', service_time:entry.serviceTime||'', memo:entry.memo||'', ref:entry.ref||'', conti_yt:entry.contiYt||'', songs:entry.songs||[], leader:entry.leader||'', created_by:currentUser.id }, { onConflict:'id' }); } catch(e) { console.log('[WM] saveWeekly error:', e); }
 }
 
-// ── Supabase: 주차 삭제
-async function deleteWeeklyFromSupabase(id) {
-  try { await sb.from('weekly_contis').delete().eq('id', id); } catch(e) {}
-}
+async function deleteWeeklyFromSupabase(id) { try { await sb.from('weekly_contis').delete().eq('id', id); } catch(e) {} }
 
-// ── Supabase: 전달사항
 async function loadAnnouncementFromSupabase(cid) {
   try {
     const { data } = await sb.from('announcements').select('*').eq('church_id', 'osong').single();
-    if (data) {
-      announcement = {
-        date: data.date, service: data.service, theme: data.theme,
-        body: data.body, practice: data.practice, serviceTime: data.service_time
-      };
-    }
+    if (data) announcement = { date:data.date, service:data.service, theme:data.theme, body:data.body, practice:data.practice, serviceTime:data.service_time };
   } catch(e) { announcement = null; }
 }
 
 async function saveAnnouncementToSupabase(ann) {
-  try {
-    await sb.from('announcements').upsert({
-      church_id: 'osong', date: ann.date, service: ann.service,
-      theme: ann.theme, body: ann.body, practice: ann.practice,
-      service_time: ann.serviceTime, updated_at: new Date().toISOString()
-    }, { onConflict: 'church_id' });
-  } catch(e) { console.log('[WM] saveAnn error:', e); }
+  try { await sb.from('announcements').upsert({ church_id:'osong', date:ann.date, service:ann.service, theme:ann.theme, body:ann.body, practice:ann.practice, service_time:ann.serviceTime, updated_at:new Date().toISOString() }, { onConflict:'church_id' }); } catch(e) {}
 }
 
-// ── Supabase: 저장된 콘티
 async function loadSavedContisFromSupabase(cid) {
   try {
-    const { data } = await sb.from('saved_contis')
-      .select('*').order('created_at', { ascending: false });
-    savedContis = (data || []).map(sc => ({
-      id: sc.id, name: sc.name, songs: sc.songs || [],
-      createdAt: sc.created_at
-    }));
+    const { data } = await sb.from('saved_contis').select('*').order('created_at', { ascending: false });
+    savedContis = (data||[]).map(sc => ({ id:sc.id, name:sc.name, songs:sc.songs||[], createdAt:sc.created_at }));
   } catch(e) { savedContis = []; }
 }
 
 async function saveSavedContiToSupabase(sc) {
-  try {
-    await sb.from('saved_contis').insert({
-      id: sc.id, name: sc.name,
-      songs: sc.songs, created_by: currentUser.id
-    });
-  } catch(e) { console.log('[WM] saveConti error:', e); }
+  try { await sb.from('saved_contis').insert({ id:sc.id, name:sc.name, songs:sc.songs, created_by:currentUser.id }); } catch(e) {}
 }
 
-async function deleteSavedContiFromSupabase(id) {
-  try { await sb.from('saved_contis').delete().eq('id', id); } catch(e) {}
-}
+async function deleteSavedContiFromSupabase(id) { try { await sb.from('saved_contis').delete().eq('id', id); } catch(e) {} }
 
-// ── Supabase: 컬렉션
 async function loadCollectionsFromSupabase() {
   if (!currentUser?.id) { collections = {}; return; }
   try {
-    const { data } = await sb.from('collections')
-      .select('*').eq('user_id', currentUser.id);
+    const { data } = await sb.from('collections').select('*').eq('user_id', currentUser.id);
     collections = {};
-    (data || []).forEach(c => {
-      collections[c.id] = { name: c.name, icon: c.icon, songs: c.songs || [] };
-    });
+    (data||[]).forEach(c => { collections[c.id] = { name:c.name, icon:c.icon, songs:c.songs||[] }; });
   } catch(e) { collections = {}; }
 }
 
 async function saveCollectionToSupabase(id, coll) {
   if (!currentUser?.id) return;
-  try {
-    await sb.from('collections').upsert({
-      id, user_id: currentUser.id,
-      name: coll.name, icon: coll.icon, songs: coll.songs || []
-    }, { onConflict: 'id' });
-  } catch(e) { console.log('[WM] saveColl error:', e); }
+  try { await sb.from('collections').upsert({ id, user_id:currentUser.id, church_id:currentUser.church_id, name:coll.name, icon:coll.icon, songs:coll.songs||[] }, { onConflict:'id' }); } catch(e) {}
 }
 
-async function deleteCollectionFromSupabase(id) {
-  try { await sb.from('collections').delete().eq('id', id); } catch(e) {}
-}
+async function deleteCollectionFromSupabase(id) { try { await sb.from('collections').delete().eq('id', id); } catch(e) {} }
 
-// ── Supabase: 찬양 배움터
 async function loadLearningFromSupabase(cid) {
   try {
-    const { data } = await sb.from('learning_items')
-      .select('*').order('created_at', { ascending: false });
-    // renderLearning에서 직접 Supabase 쿼리하므로 여기선 캐싱만
-    window._learningCache = data || [];
+    const { data } = await sb.from('learning_items').select('*').order('created_at', { ascending: false });
+    window._learningCache = data||[];
   } catch(e) { window._learningCache = []; }
 }
 
 async function saveLearningToSupabase(item) {
-  try {
-    await sb.from('learning_items').insert({
-      id: item.id, title: item.title,
-      artist: item.artist || '', key: item.key || '',
-      yt: item.yt || '', status: item.status || 'new',
-      memo: item.memo || '', added_by: item.addedBy || ''
-    });
-  } catch(e) { console.log('[WM] saveLearning error:', e); }
+  try { await sb.from('learning_items').insert({ id:item.id, title:item.title, artist:item.artist||'', key:item.key||'', yt:item.yt||'', status:item.status||'new', memo:item.memo||'', added_by:item.addedBy||'' }); } catch(e) {}
 }
 
-async function updateLearningStatusSupabase(id, status) {
-  try { await sb.from('learning_items').update({ status }).eq('id', id); } catch(e) {}
-}
-
-async function deleteLearningFromSupabase(id) {
-  try { await sb.from('learning_items').delete().eq('id', id); } catch(e) {}
-}
-
-// ── Supabase: Dev Note (church_settings)
-async function loadDevNoteFromSupabase() {
-  try {
-    const { data } = await sb.from('church_settings').select('*').eq('church_id', 'osong').single();
-    return data;
-  } catch(e) { return null; }
-}
-
-async function saveDevNoteToSupabase(version, noteContent) {
-  try {
-    await sb.from('church_settings').upsert({
-      church_id: 'osong', dev_note_version: version,
-      dev_note_content: noteContent, dev_note_updated: new Date().toISOString()
-    }, { onConflict: 'church_id' });
-  } catch(e) { console.log('[WM] saveDevNote error:', e); }
-}
+async function updateLearningStatusSupabase(id, status) { try { await sb.from('learning_items').update({ status }).eq('id', id); } catch(e) {} }
+async function deleteLearningFromSupabase(id) { try { await sb.from('learning_items').delete().eq('id', id); } catch(e) {} }
 
 function saveData(key, val) {
-  // localStorage는 theme/sidebar 설정만 저장 (나머지는 Supabase)
-  const allowedKeys = ['wm_theme', 'wm_sidebar'];
-  if (!allowedKeys.some(k => key.includes(k))) return; // 데이터 키는 무시
-  try {
-    localStorage.setItem(key, JSON.stringify(val));
-  } catch(e) {}
+  // theme/sidebar 설정만 localStorage 사용, 나머지는 Supabase
+  if (!key.includes('theme') && !key.includes('sidebar')) return;
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
 }
 
 function renderAll() {
@@ -2567,7 +2468,7 @@ function openAnnEdit() {
   document.getElementById('annServiceInp').value = a.service || '';
   document.getElementById('annThemeInp').value = a.theme || '';
   document.getElementById('annBodyInp').value = a.body || '';
-  document.getElementById('annPracticeInp').value = a.practice || '08:00';
+  document.getElementById('annPracticeInp').value = a.practice || '';
   document.getElementById('annServiceTimeInp').value = a.serviceTime || '09:00';
   openModal('annModal');
 }
@@ -2645,6 +2546,7 @@ function saveQuickConti() {
   updateAnnFromConti(entry);
   renderWeekly(); renderThisWeek();
   closeModal('quickContiModal');
+  showPage('weekly', null);
   showToast('콘티가 등록되었습니다!');
   setTimeout(()=>showPage('weekly',null), 400);
 }
@@ -2702,27 +2604,17 @@ function renderWkSongs() {
     </div>`).join('');
 }
 
-function saveWeekly() {
+async function saveWeekly() {
   const date = document.getElementById('wkDate').value;
   if (!date) { showToast('날짜를 선택해주세요'); return; }
-  const entry = {
-    id:'wk'+Date.now(), date,
-    service: document.getElementById('wkService').value||'주일 예배',
-    practice: document.getElementById('wkPractice').value,
-    serviceTime: document.getElementById('wkServiceTime').value,
-    title: document.getElementById('wkTitle').value,
-    ref: document.getElementById('wkRef').value,
-    contiYt: document.getElementById('wkContiYt').value||'',
-    memo: document.getElementById('wkMemo').value,
-    songs: wkSongs.filter(s=>s.title.trim()),
-    createdAt: new Date().toISOString()
-  };
+  const entry = {id:'wk'+Date.now(), date, service: document.getElementById('wkService').value||'주일 예배', practice: document.getElementById('wkPractice').value, serviceTime: document.getElementById('wkServiceTime').value, title: document.getElementById('wkTitle').value, ref: document.getElementById('wkRef').value, contiYt: document.getElementById('wkContiYt').value||'', memo: document.getElementById('wkMemo').value, songs: wkSongs.filter(s=>s.title.trim()), createdAt:new Date().toISOString()};
   weeklyContis.unshift(entry);
-  saveWeeklyToSupabase(entry); // ← Supabase 저장
+  // Supabase에서 저장됨
   renderWeekly(); renderThisWeek();
   closeModal('weeklyModal');
   logActivity('콘티 등록', `${entry.date} ${entry.service}`, `${entry.songs?.length||0}곡`);
   showToast('주차가 등록되었습니다!');
+  // 등록 직후 할당 제안 (관리자/워십리더만)
   if (isAdmin()) {
     setTimeout(() => {
       if (confirm('📤 팀원에게 콘티를 바로 할당할까요?\n\n' + entry.date + ' ' + entry.service + ' (' + entry.songs.length + '곡)')) {
@@ -2843,9 +2735,7 @@ function toggleWeek(h) {
 
 function deleteWeekly(i) {
   if (!confirm('삭제할까요?')) return;
-  const id = weeklyContis[i]?.id;
-  weeklyContis.splice(i,1);
-  if (id) deleteWeeklyFromSupabase(id);
+  const _wid = weeklyContis[i]?.id; weeklyContis.splice(i,1); if(_wid) deleteWeeklyFromSupabase(_wid);
   renderWeekly(); renderThisWeek();
 }
 
@@ -3358,7 +3248,7 @@ function exportData() {
   showToast('데이터가 내보내기 되었습니다');
 }
 
-function importData(input) {
+async function importData(input) {
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
@@ -3368,12 +3258,13 @@ function importData(input) {
       if (!data.version) { showToast('올바른 백업 파일이 아닙니다'); return; }
       if (!confirm(`백업 데이터를 가져오시겠습니까?\n악보 ${data.scores?.length||0}개, 주차 ${data.weekly?.length||0}개\n\n⚠️ 현재 데이터에 추가됩니다.`)) return;
       // 기존 데이터에 병합 (중복 id 제외)
-      const existIds = new Set(scores.map(s=>s.id));
+      const existScores = JSON.parse(localStorage.getItem('wm_scores')||'[]');
+      const existIds = new Set(existScores.map(s=>s.id));
       const newScores = (data.scores||[]).filter(s=>!existIds.has(s.id));
-      for (const s of newScores) { scores.push(s); await saveScoreToSupabase(s); }
+      localStorage.setItem('wm_scores', JSON.stringify([...existScores, ...newScores]));
       const existWIds = new Set(weeklyContis.map(w=>w.id));
       const newWeekly = (data.weekly||[]).filter(w=>!existWIds.has(w.id));
-      for (const w of newWeekly) { weeklyContis.unshift(w); await saveWeeklyToSupabase(w); }
+      newWeekly.forEach(w=>{weeklyContis.unshift(w);saveWeeklyToSupabase(w);});
       loadAllData();
       showToast(`악보 ${newScores.length}개, 주차 ${newWeekly.length}개가 추가되었습니다`);
     } catch(err) {
@@ -3433,15 +3324,7 @@ function createColl() {
   renderCollections();
 }
 
-function saveColl(id) {
-  // id가 있으면 해당 컬렉션만, 없으면 전체 저장
-  if (!currentUser || currentUser.id === 'guest') return;
-  if (id) {
-    saveCollectionToSupabase(id, collections[id]);
-  } else {
-    Object.entries(collections).forEach(([cid, coll]) => saveCollectionToSupabase(cid, coll));
-  }
-}
+function saveColl(id) { if(!currentUser||currentUser.id==='guest')return; if(id){saveCollectionToSupabase(id,collections[id]);}else{Object.entries(collections).forEach(([cid,c])=>saveCollectionToSupabase(cid,c));} }
 
 function openCollDetail(id) {
   currentCollId=id;
@@ -3459,10 +3342,7 @@ function closeCollDetail() {
 
 function deleteColl() {
   if (!confirm('폴더를 삭제할까요?')) return;
-  const id = currentCollId;
-  delete collections[id];
-  deleteCollectionFromSupabase(id);
-  closeCollDetail();
+  const _cid=currentCollId; delete collections[_cid]; deleteCollectionFromSupabase(_cid); closeCollDetail();
   renderCollections();
 }
 
@@ -3556,9 +3436,7 @@ function saveConti() {
   if (!currentConti.length) { showToast('콘티에 곡을 먼저 추가해주세요'); return; }
   const name = prompt('콘티 이름:', new Date().toLocaleDateString('ko-KR')+'  콘티');
   if (!name) return;
-  const sc = {id:'sc'+Date.now(), name, songs:[...currentConti], createdAt:new Date().toISOString()};
-  savedContis.unshift(sc);
-  saveSavedContiToSupabase(sc);
+  const _sc={id:'sc'+Date.now(), name, songs:[...currentConti], createdAt:new Date().toISOString()}; savedContis.unshift(_sc); saveSavedContiToSupabase(_sc);
   showToast('저장되었습니다');
 }
 
@@ -3578,12 +3456,7 @@ function openSavedConti() {
 }
 
 function loadSavedConti(i) { currentConti=[...savedContis[i].songs]; renderContiPool(); renderContiList(); closeModal('savedContiModal'); }
-function deleteSavedConti(i) {
-  const id = savedContis[i]?.id;
-  savedContis.splice(i,1);
-  if (id) deleteSavedContiFromSupabase(id);
-  openSavedConti();
-}
+function deleteSavedConti(i) { const _id=savedContis[i]?.id; savedContis.splice(i,1); if(_id) deleteSavedContiFromSupabase(_id); openSavedConti(); }
 
 // ════════════════════════════════════════════
 // RECOMMENDER — 키워드 매칭
@@ -4068,10 +3941,10 @@ function highlightKeywords(text, keywords) {
 }
 
 // YouTube 영상 담기
-function addYtToLearning(ytId, title) {
-  const items = window._learningCache || [];
+async function addYtToLearning(ytId, title) {
+  const items = window._learningCache||[];
   if (items.find(i=>i.yt && i.yt.includes(ytId))) { showToast('이미 배움터에 있어요!'); return; }
-  items.unshift({
+  window._learningCache=(window._learningCache||[]); window._learningCache.unshift({
     id: 'l'+Date.now(), title: title.slice(0,50),
     artist: '', key: '',
     yt: `https://youtube.com/watch?v=${ytId}`,
@@ -4103,7 +3976,7 @@ function addYtToPlaylist(ytId, title) {
   if (firstColl.songs.find(s=>s.ytId===ytId)) { showToast('이미 Playlist에 있어요!'); return; }
   firstColl.songs.push({ id:'yt_'+ytId, title: title.slice(0,50), key:'', ytId, yt:`https://youtube.com/watch?v=${ytId}` });
   collections[firstId] = firstColl;
-  saveColl(firstId);
+  saveColl();
   showToast(`📂 "${firstColl.name}" Playlist에 추가됐어요!`);
 }
 
@@ -4336,7 +4209,7 @@ function generateKakaoMsg() {
   const latest = weeklyContis[0];
   if (!latest) return;
   const songs = latest.songs.map((s,i)=>`${i+1}. ${s.title} (${s.key})`).join('\n');
-  const msg = `할렐루야! 🙌\n${latest.date} ${latest.service} 콘티입니다😁\n\n${songs}\n\n${latest.memo||''}\n\n⏰ 연습: ${latest.practice||'08:00'}\n공감표시나 아멘으로 화답해주시면 큰 힘이 됩니다 👍\n감사합니다`;
+  const msg = `할렐루야! 🙌\n${latest.date} ${latest.service} 콘티입니다😁\n\n${songs}\n\n${latest.memo||''}\n\n⏰ 연습: ${latest.practice||''}\n공감표시나 아멘으로 화답해주시면 큰 힘이 됩니다 👍\n감사합니다`;
   document.getElementById('kakaoPreview').textContent = msg;
 }
 
@@ -4375,7 +4248,7 @@ function addCustomRole() {
 
 function updateUserInStorage() {
   if (!currentUser || currentUser.id==='guest') return;
-  saveProfile_sb(); // localStorage 대신 Supabase 직접 저장
+  saveProfile_sb();
 }
 
 function renderWishes() {
@@ -5042,17 +4915,12 @@ function renderDevNote() {
     updatedAt: '2026-05-10'
   };
 
-  // Supabase에서 Dev Note 로드 (비동기)
-  let note = DEFAULT_NOTE;
-  loadDevNoteFromSupabase().then(data => {
-    if (data?.dev_note_content) {
-      note = { version: data.dev_note_version, content: data.dev_note_content };
-      const verEl = document.getElementById('devNoteVersion');
-      const contentEl = document.getElementById('devNoteContent');
-      if (verEl) verEl.textContent = note.version||'';
-      if (contentEl) contentEl.textContent = note.content;
-    }
-  });
+  let note = JSON.parse(localStorage.getItem('wm_devnote')||'null');
+  // 저장된 노트가 없거나 버전이 다르면 기본값 사용
+  if (!note || note.version !== DEFAULT_NOTE.version) {
+    note = DEFAULT_NOTE;
+    localStorage.setItem('wm_devnote', JSON.stringify(note));
+  }
 
   card.style.display = 'block';
   const verEl = document.getElementById('devNoteVersion');
@@ -5065,15 +4933,14 @@ function renderDevNote() {
   if (editBtn) editBtn.style.display = isAdmin() ? 'block' : 'none';
 }
 function openDevNoteEdit() {
-  // Supabase에서 로드 (현재 화면의 값 사용)
+  const note = JSON.parse(localStorage.getItem('wm_devnote')||'{}');
   document.getElementById('devNoteVer').value = note.version||'v0.7.17';
   document.getElementById('devNoteText').value = note.content||'';
   openModal('devNoteModal');
 }
 function saveDevNote() {
-  const version = document.getElementById('devNoteVer').value;
-  const content = document.getElementById('devNoteText').value;
-  saveDevNoteToSupabase(version, content);
+  const note = { version: document.getElementById('devNoteVer').value, content: document.getElementById('devNoteText').value, updatedAt: new Date().toISOString() };
+  localStorage.setItem('wm_devnote', JSON.stringify(note));
   renderDevNote(); closeModal('devNoteModal'); showToast('Dev Note가 저장되었습니다');
 }
 
@@ -5089,7 +4956,7 @@ function saveLearning() {
   const title = document.getElementById('learnTitle').value.trim();
   if (!title) { showToast('찬양 제목을 입력해주세요'); return; }
   const item = { id:'l'+Date.now(), title, artist:document.getElementById('learnArtist').value, key:document.getElementById('learnKey').value, yt:document.getElementById('learnYt').value, status:document.getElementById('learnStatus').value, memo:document.getElementById('learnMemo').value, addedBy:currentUser?.name||'', createdAt:new Date().toISOString() };
-  window._learningCache = window._learningCache || [];
+  window._learningCache = window._learningCache||[];
   window._learningCache.unshift(item);
   saveLearningToSupabase(item);
   renderLearning(); closeModal('addLearningModal'); showToast('찬양이 추가되었습니다 🎓');
@@ -5099,7 +4966,7 @@ function renderLearning() {
   if (!el) return;
   const q = (document.getElementById('learningSearch')?.value||'').toLowerCase();
   const filter = document.getElementById('learningFilter')?.value||'';
-  const items = window._learningCache || [];
+  const items = window._learningCache||[];
   const filtered = items.filter(i => { const m=i.title.toLowerCase().includes(q)||(i.artist||'').toLowerCase().includes(q); return m&&(!filter||i.status===filter); });
   const learningAddBtn=document.getElementById('learningAddBtn');
   if(learningAddBtn) learningAddBtn.style.display=isAdmin()?'flex':'none';
@@ -5131,17 +4998,8 @@ function renderLearning() {
   }).join('');
 }
 function getYtId(url) { const m=(url||'').match(/(?:v=|youtu\.be\/|embed\/)([^&?/]+)/); return m?m[1]:''; }
-function updateLearningStatus(id,status) {
-  const items = window._learningCache || [];
-  const item = items.find(x=>x.id===id);
-  if (item) { item.status=status; updateLearningStatusSupabase(id,status); renderLearning(); showToast('상태 변경됨'); }
-}
-function deleteLearning(id) {
-  if(!confirm('삭제할까요?'))return;
-  window._learningCache = (window._learningCache||[]).filter(x=>x.id!==id);
-  deleteLearningFromSupabase(id);
-  renderLearning();
-}
+function updateLearningStatus(id,status) { const item=(window._learningCache||[]).find(x=>x.id===id); if(item){item.status=status;updateLearningStatusSupabase(id,status);renderLearning();showToast('상태 변경됨');} }
+function deleteLearning(id) { if(!confirm('삭제할까요?'))return; window._learningCache=(window._learningCache||[]).filter(x=>x.id!==id); deleteLearningFromSupabase(id); renderLearning(); }
 
 // ════════════════════════════════════════════
 // 교회 신문고
@@ -5194,7 +5052,7 @@ async function submitSuggestion() {
 window._suggPage = window._suggPage || 1;
 const SUGG_PAGE_SIZE = 5;
 
-async function renderSuggestions(resetPage) {
+async async function renderSuggestions(resetPage) {
   if (resetPage) window._suggPage = 1;
   const el = document.getElementById('suggestionList');
   if (!el) return;
@@ -5457,12 +5315,34 @@ async function loadScoresFromSupabase() {
     } else {
       // Supabase에 없으면 localStorage 데이터를 Supabase로 마이그레이션
       const localScores = JSON.parse(localStorage.getItem('wm_scores')||'[]');
-      // 마이그레이션 제거 — 새 교회는 빈 상태로 시작
+      if (localScores.length) await migrateScoresToSupabase(localScores);
     }
   } catch(e) {
     console.log('Supabase scores fallback to localStorage:', e);
     scores = JSON.parse(localStorage.getItem('wm_scores')||'[]');
   }
+}
+
+async function migrateScoresToSupabase(localScores) {
+  for (const s of localScores) {
+    try {
+      // insert only - 이미 있는 데이터는 덮어쓰지 않음
+      await sb.from('scores').insert({
+        id: s.id,
+        title: s.title,
+        key: s.key || '',
+        artist: s.artist || '',
+        yt: (s.yt && s.yt !== '-') ? s.yt : '',
+        ref: (s.ref && s.ref !== '-') ? s.ref : '',
+        memo: s.memo || '',
+        file_data: s.file?.data || null,
+        file_type: s.file?.type || null,
+        last_edit: s.lastEdit,
+        uploaded_by: currentUser?.id
+      });
+    } catch(e) { /* 이미 있으면 skip */ }
+  }
+  showToast('악보 데이터가 전체 공유로 마이그레이션되었습니다!');
 }
 
 async function saveScoreToSupabase(score) {
@@ -5484,7 +5364,7 @@ async function saveScoreToSupabase(score) {
       file_type: score.file?.type || null,
       last_edit: score.lastEdit,
       uploaded_by: currentUser?.id,
-      // church_id 없음 (오송교회 단일 Supabase)
+      church_id: currentUser?.church_id || null  // ← 멀티테넌트
     });
     if (error) {
       console.log('Score save error:', error);
