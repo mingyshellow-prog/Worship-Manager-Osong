@@ -5052,7 +5052,7 @@ async function submitSuggestion() {
 window._suggPage = window._suggPage || 1;
 const SUGG_PAGE_SIZE = 5;
 
-async async function renderSuggestions(resetPage) {
+async function renderSuggestions(resetPage) {
   if (resetPage) window._suggPage = 1;
   const el = document.getElementById('suggestionList');
   if (!el) return;
