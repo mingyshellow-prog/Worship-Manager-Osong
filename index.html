@@ -6,11 +6,11 @@
 <meta name="theme-color" content="#1C1F14"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="워십매니저"/>
+<meta name="apple-mobile-web-app-title" content="오송 워십매니저"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <link rel="manifest" href="manifest.json"/>
 <link rel="apple-touch-icon" href="icon-192.png"/>
-<title>워십매니저</title>
+<title>워십매니저 — 오송생명교회</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -2136,8 +2136,8 @@ function applyChurchBranding() {
   }
 }
 
-const SUPABASE_URL = 'https://uvyahitvpuvtwcejavqj.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2eWFoaXR2cHV2dHdjZWphdnFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNDQ2MTYsImV4cCI6MjA5MzYyMDYxNn0.1HAaTNyKRoJb5jRR30PUkFO9Eubh9Io6Gao02UFTkTQ';
+const SUPABASE_URL = 'https://tdovjsqkquybktmedewu.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_O03HB6BfZzOe1tFYGDDVuw_KtJKNoSu';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ════════════════════════════════════════════
@@ -5582,7 +5582,7 @@ function updateDday() {
 // ════════════════════════════════════════════
 let _allChurches = [];
 let _editingChurchId = null;
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Iw5WlS0Pg9uB4P5S7ZQxtDWr-5hY6PFW9Ii-fo-lFkA/export?format=csv&gid=876261369';
+const SHEET_CSV_URL = ''; // 오송교회 전용 — 별도 신청 시트 없음
 
 // 교회 통계 로드
 async function loadChurchStats() {
