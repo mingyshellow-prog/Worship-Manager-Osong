@@ -3362,7 +3362,7 @@ function importData(input) {
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = e => {
+  reader.onload = async e => {
     try {
       const data = JSON.parse(e.target.result);
       if (!data.version) { showToast('올바른 백업 파일이 아닙니다'); return; }
