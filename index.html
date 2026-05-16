@@ -548,13 +548,13 @@ nav{flex:1;padding:4px 8px;overflow-y:auto;}
 
         <!-- 전달사항 -->
         <div class="ann-card" id="annCard">
-          <button class="ann-edit-btn" id="annEditBtn" style="display:none;" onclick="openAnnEdit()">✏️ 수정</button>
+          <button class="ann-edit-btn" id="annEditBtn" style="display:none;" onclick="openAnnEdit()">✏️ 편집</button>
           <div class="ann-header">
-            <span class="ann-badge">📢 전도사님 전달사항</span>
+            <span class="ann-badge">📢 공지사항</span>
             <span class="ann-badge ann-date" id="annDate">-</span>
           </div>
-          <div class="ann-theme" id="annTheme">이번 주 콘티를 준비했습니다</div>
-          <div class="ann-body" id="annBody">전달사항을 입력해주세요.</div>
+          <div class="ann-theme" id="annTheme">이번 주 공지사항을 입력해주세요</div>
+          <div class="ann-body" id="annBody">✏️ 편집 버튼을 눌러 내용을 입력해보세요.</div>
           <div class="ann-meta">
             <span id="annPractice">⏰ 연습: -</span>
             <span id="annService">🙏 예배: -</span>
@@ -2257,7 +2257,7 @@ function updateUserUI() {
   document.getElementById('sidebarName').textContent = currentUser.name;
   document.getElementById('sidebarRole').textContent = getRoleLabel(currentUser.role);
   // admin features
-  if (isAdmin()) {
+  if (isAdmin() || isWorshipLeader()) {
     document.getElementById('annEditBtn').style.display = 'block';
     document.getElementById('quickContiBtn').style.display = 'flex';
     document.getElementById('weeklyAddBtn').style.display = 'flex';
