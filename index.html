@@ -1867,23 +1867,51 @@ function applyChurchBranding() {
   const name = c?.name || '워십매니저';
   const location = c?.location || '';
   const tagline = c?.tagline ? `${c.tagline}${location ? ' · ' + location : ''}` : location;
-
   document.title = c ? `${name} — 워십매니저` : '워십매니저';
-
   const splashName = document.getElementById('splashChurchName');
   if (splashName) splashName.textContent = name;
   const introName = document.getElementById('introChurchName');
   if (introName) introName.textContent = name;
   const introLoc = document.getElementById('introChurchLocation');
   if (introLoc) introLoc.textContent = location;
-
   const loginTitle = document.getElementById('loginChurchName');
   if (loginTitle) loginTitle.textContent = name;
-
   const sidebarName = document.getElementById('sidebarChurchName');
   if (sidebarName) sidebarName.textContent = name;
   const sidebarTag = document.getElementById('sidebarTagline');
   if (sidebarTag) sidebarTag.textContent = tagline;
+}
+
+function showIntro(callback) {
+  const intro = document.getElementById('introScreen');
+  const content = document.getElementById('introContent');
+  const line = document.getElementById('introLine');
+  const canvas = document.getElementById('introCanvas');
+  if (!intro) { if(callback) callback(); return; }
+  intro.style.display = 'flex';
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const particles = Array.from({length:80}, () => ({ x:Math.random()*canvas.width, y:Math.random()*canvas.height, r:Math.random()*1.5+0.3, o:Math.random(), speed:Math.random()*0.3+0.1, twinkle:Math.random()*Math.PI*2 }));
+    let animId;
+    function drawParticles() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      particles.forEach(p => { p.twinkle+=p.speed*0.05; p.o=0.3+Math.sin(p.twinkle)*0.4; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle=`rgba(167,175,100,${p.o})`; ctx.fill(); });
+      animId = requestAnimationFrame(drawParticles);
+    }
+    drawParticles();
+    setTimeout(() => cancelAnimationFrame(animId), 2800);
+  }
+  setTimeout(() => { content.style.opacity='1'; content.style.transform='scale(1)'; if(line) line.style.width='200px'; }, 100);
+  setTimeout(() => { intro.style.transition='opacity .7s ease'; intro.style.opacity='0'; setTimeout(() => { intro.style.display='none'; intro.style.opacity='1'; if(callback) callback(); }, 700); }, 2200);
+}
+
+function hideSplash() {
+  const splash = document.getElementById('splashScreen');
+  if (!splash) return;
+  splash.style.transition = 'opacity .6s ease';
+  splash.style.opacity = '0';
+  setTimeout(() => { splash.style.display = 'none'; }, 600);
 }
 
 // ════════════════════════════════════════════
