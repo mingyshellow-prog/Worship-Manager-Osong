@@ -3029,17 +3029,6 @@ function scorePageNext() {
     document.getElementById('scorePageIndicator').textContent = `${window._viewingScorePage} / 2`;
   }
 }
-  // 유튜브 버튼 (상단)
-  const ytBtn = document.getElementById('scoreYtBtn');
-  if (ytBtn) {
-    if (s.yt) {
-      ytBtn.style.display = 'flex';
-      window._viewingScoreYt = s.yt;
-    } else {
-      ytBtn.style.display = 'none';
-      window._viewingScoreYt = '';
-    }
-  }
 function toggleScoreFullscreen() {
   const modal = document.getElementById('scoreViewModal');
   const box = modal.querySelector('.modal-box');
