@@ -3040,27 +3040,6 @@ function scorePageNext() {
       window._viewingScoreYt = '';
     }
   }
-  // 다운로드 버튼 표시
-  const dlBtn = document.getElementById('scoreDownloadBtn');
-  if (dlBtn) dlBtn.style.display = s.file ? 'flex' : 'none';
-  const imgEl = document.getElementById('scoreViewImg');
-  if (s.file) {
-    const isPdf = s.file.type === 'application/pdf' || 
-                  (s.file.name || '').toLowerCase().endsWith('.pdf') ||
-                  (s.file.data || '').includes('data:application/pdf');
-    if (isPdf) {
-      imgEl.innerHTML=`<iframe src="${s.file.data}" style="width:100%;height:75vh;border:1px solid var(--border);border-radius:8px;" id="scoreIframe"></iframe>`;
-    } else {
-      imgEl.innerHTML=`<img src="${s.file.data}" style="width:100%;border-radius:8px;border:1px solid var(--border);cursor:zoom-in;" onclick="toggleScoreFullscreen()" id="scoreImg"/>`;
-    }
-  } else imgEl.innerHTML='<div style="text-align:center;padding:30px;font-size:13px;color:var(--light);">악보 파일이 없습니다<br><small style="color:var(--light);">악보 추가 시 파일을 첨부해주세요</small></div>';
-  document.getElementById('scoreViewLinks').innerHTML = [
-    s.yt ? `<a href="${s.yt}" target="_blank" class="link-btn yt"><svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><path d="M8 5v14l11-7z"/></svg> 유튜브</a>` : '',
-    s.ref ? `<a href="${s.ref}" target="_blank" class="link-btn">🔗 레퍼런스</a>` : ''
-  ].join('');
-  openModal('scoreViewModal');
-}
-
 function toggleScoreFullscreen() {
   const modal = document.getElementById('scoreViewModal');
   const box = modal.querySelector('.modal-box');
