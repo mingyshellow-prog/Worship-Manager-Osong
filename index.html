@@ -131,6 +131,72 @@ nav{flex:1;padding:4px 8px;overflow-y:auto;}
 .badge-member{background:var(--olive-bg);color:var(--olive-d);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--cream);padding:10px 20px;border-radius:20px;font-size:13px;z-index:9000;opacity:0;transition:opacity .3s;pointer-events:none;}
 .toast.show{opacity:1;}
+/* ── 툴팁 */
+.nav-item[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: calc(var(--sw) + 4px);
+  background: rgba(0,0,0,0.82);
+  color: #fff;
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 7px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1000;
+  font-family: 'Noto Sans KR', sans-serif;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.nav-item[title] { position: relative; }
+.sidebar.collapsed .nav-item[title]:hover::after { left: 60px; }
+
+/* ── 버튼 툴팁 */
+[data-tip] { position: relative; }
+[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.82);
+  color: #fff;
+  font-size: 11px;
+  padding: 4px 9px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 9999;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+/* ── 모바일 개선 */
+@media(max-width:768px) {
+  .modal-box { border-radius: 20px 20px 0 0; max-height: 92vh; overflow-y: auto; }
+  .modal-bg { align-items: flex-end; padding: 0; }
+  .page-body { padding: 14px 14px 90px; }
+  .page-header { padding: 12px 16px 10px; gap: 8px; }
+  .page-header > div:last-child { display: flex; flex-wrap: wrap; gap: 6px; }
+  .form-row { grid-template-columns: 1fr; }
+  .conti-grid { grid-template-columns: 1fr; height: auto; }
+  .weekly-grid { grid-template-columns: 1fr !important; }
+  /* 뒤로가기 버튼 항상 표시 */
+  .back-btn { display: flex !important; }
+}
+@media(min-width:769px) and (max-width:1100px) {
+  :root { --sw: 190px; }
+  .coll-grid { grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); }
+}
+
+/* ── 악보 그룹 */
+.score-group { margin-bottom: 10px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.score-group-header { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; background: var(--olive-bg); cursor: pointer; border-bottom: 1px solid var(--border); }
+.score-group-title { font-size: 13px; font-weight: 700; color: var(--olive-d); }
+.score-group-count { font-size: 11px; color: var(--light); background: var(--white); padding: 2px 8px; border-radius: 10px; }
+.score-group-body { display: none; }
+.score-group-body.open { display: block; }
+.score-group-body .score-row { border-radius: 0; border-left: none; border-right: none; border-top: none; }
+.score-group-body .score-row:last-child { border-bottom: none; }
+
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes onboardIn{from{opacity:0;transform:scale(0.85) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
 
@@ -467,18 +533,18 @@ nav{flex:1;padding:4px 8px;overflow-y:auto;}
       </div>
       <div class="app-badge">악보 / 콘티 매니저</div>
       <nav>
-        <button class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">🏠</span><span class="nav-label">대시보드</span></button>
-        <button class="nav-item" onclick="showPage('weekly',this)"><span class="nav-icon">📅</span><span class="nav-label">주차별 찬양</span></button>
-        <button class="nav-item" onclick="showPage('library',this)"><span class="nav-icon">🎵</span><span class="nav-label">악보 창고</span></button>
-        <button class="nav-item" onclick="showPage('collections',this)"><span class="nav-icon">📂</span><span class="nav-label">Playlist</span></button>
+        <button class="nav-item active" data-role="all" title="이번 주 콘티·공지·통계를 한눈에" onclick="showPage('dashboard',this)"><span class="nav-icon">🏠</span><span class="nav-label">대시보드</span></button>
+        <button class="nav-item" data-role="all" title="주차별 등록된 콘티와 찬양 목록 확인" onclick="showPage('weekly',this)"><span class="nav-icon">📅</span><span class="nav-label">주차별 찬양</span></button>
+        <button class="nav-item" data-role="all" title="악보 파일을 등록하고 검색해요" onclick="showPage('library',this)"><span class="nav-icon">🎵</span><span class="nav-label">악보 창고</span></button>
+        <button class="nav-item" data-role="all" title="내 악보 모음 폴더를 만들어 관리해요" onclick="showPage('collections',this)"><span class="nav-icon">📂</span><span class="nav-label">Playlist</span></button>
         <div class="nav-section">워크플로우</div>
-        <button class="nav-item" onclick="showPage('conti',this)"><span class="nav-icon">✍️</span><span class="nav-label">빠른 콘티 짜기</span></button>
-        <button class="nav-item" onclick="showPage('recommender',this)"><span class="nav-icon">🔮</span><span class="nav-label">찬양 추천기</span></button>
-        <button class="nav-item" onclick="showPage('learning',this)"><span class="nav-icon">🎓</span><span class="nav-label">찬양 배움터</span></button>
-        <button class="nav-item" onclick="showPage('merge',this)"><span class="nav-icon">📋</span><span class="nav-label">악보 합치기</span></button>
+        <button class="nav-item" data-role="leader" title="악보를 골라 이번 주 콘티를 빠르게 구성해요" onclick="showPage('conti',this)"><span class="nav-icon">✍️</span><span class="nav-label">빠른 콘티 짜기</span></button>
+        <button class="nav-item" data-role="all" title="AI가 예배 흐름에 맞는 찬양을 추천해줘요" onclick="showPage('recommender',this)"><span class="nav-icon">🔮</span><span class="nav-label">찬양 추천기</span></button>
+        <button class="nav-item" data-role="all" title="새로운 찬양을 미리 듣고 배워봐요" onclick="showPage('learning',this)"><span class="nav-icon">🎓</span><span class="nav-label">찬양 배움터</span></button>
+        <button class="nav-item" data-role="leader" title="여러 악보를 하나의 PDF로 합쳐요" onclick="showPage('merge',this)"><span class="nav-icon">📋</span><span class="nav-label">악보 합치기</span></button>
         <div class="nav-section">마이</div>
-        <button class="nav-item" onclick="showPage('mypage',this)"><span class="nav-icon">👤</span><span class="nav-label">마이 페이지</span></button>
-        <button class="nav-item" id="adminNavBtn" style="display:none;" onclick="showPage('members',this)"><span class="nav-icon">⚙️</span><span class="nav-label">멤버 관리</span></button>
+        <button class="nav-item" data-role="all" title="내 프로필·파트·희망곡·메모 관리" onclick="showPage('mypage',this)"><span class="nav-icon">👤</span><span class="nav-label">마이 페이지</span></button>
+        <button class="nav-item" id="adminNavBtn" data-role="admin" style="display:none;" title="멤버 계정 관리·활동 로그·교회 설정" onclick="showPage('members',this)"><span class="nav-icon">⚙️</span><span class="nav-label">멤버 관리</span></button>
       </nav>
       <div class="sidebar-footer">
         <div class="user-chip" onclick="showPage('mypage',null)">
@@ -516,13 +582,13 @@ nav{flex:1;padding:4px 8px;overflow-y:auto;}
         </div>
       </div>
       <div class="page-body">
-        <!-- 교회 신문고 -->
+        <!-- 건의사항 -->
         <div style="margin-bottom:16px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:14px;overflow:hidden;">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #FDE68A;">
             <div style="display:flex;align-items:center;gap:10px;">
               <div style="width:36px;height:36px;background:#F59E0B;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;">📮</div>
               <div>
-                <div style="font-size:13px;font-weight:800;color:#92400E;">교회 신문고</div>
+                <div style="font-size:13px;font-weight:800;color:#92400E;">건의사항</div>
                 <div style="font-size:11px;color:#B45309;margin-top:1px;">기능 요청 · 건의사항 · 기타 의견</div>
               </div>
             </div>
@@ -548,13 +614,13 @@ nav{flex:1;padding:4px 8px;overflow-y:auto;}
 
         <!-- 전달사항 -->
         <div class="ann-card" id="annCard">
-          <button class="ann-edit-btn" id="annEditBtn" style="display:none;" onclick="openAnnEdit()">✏️ 편집</button>
+          <button class="ann-edit-btn" id="annEditBtn" style="display:none;" onclick="openAnnEdit()">✏️ 수정</button>
           <div class="ann-header">
-            <span class="ann-badge">📢 공지사항</span>
+            <span class="ann-badge">📢 전도사님 전달사항</span>
             <span class="ann-badge ann-date" id="annDate">-</span>
           </div>
-          <div class="ann-theme" id="annTheme">이번 주 공지사항을 입력해주세요</div>
-          <div class="ann-body" id="annBody">✏️ 편집 버튼을 눌러 내용을 입력해보세요.</div>
+          <div class="ann-theme" id="annTheme">이번 주 콘티를 준비했습니다</div>
+          <div class="ann-body" id="annBody">전달사항을 입력해주세요.</div>
           <div class="ann-meta">
             <span id="annPractice">⏰ 연습: -</span>
             <span id="annService">🙏 예배: -</span>
@@ -564,11 +630,25 @@ nav{flex:1;padding:4px 8px;overflow-y:auto;}
         <!-- 빠른 메뉴 -->
         <div class="section-label" style="margin-bottom:10px;">⚡ 빠른 메뉴</div>
         <div class="dash-grid-3" style="margin-bottom:14px;">
-          <div class="quick-card" onclick="showPage('library',null)"><div class="quick-card-icon">🎵</div><div class="quick-card-label">악보 창고</div></div>
-          <div class="quick-card" onclick="showPage('conti',null)"><div class="quick-card-icon">✍️</div><div class="quick-card-label">콘티 짜기</div></div>
-          <div class="quick-card" onclick="showPage('weekly',null)"><div class="quick-card-icon">📅</div><div class="quick-card-label">주차 기록</div></div>
-          <div class="quick-card" onclick="showPage('mypage',null)"><div class="quick-card-icon">👤</div><div class="quick-card-label">마이 페이지</div></div>
-          <div class="quick-card" onclick="showPage('merge',null)"><div class="quick-card-icon">📋</div><div class="quick-card-label">악보 합치기</div></div>
+          <div class="quick-card" title="악보 파일을 등록하고 검색해요" onclick="showPage('library',null)"><div class="quick-card-icon">🎵</div><div class="quick-card-label">악보 창고</div></div>
+          <div class="quick-card" title="이번 주 콘티를 빠르게 구성해요" onclick="showPage('conti',null)"><div class="quick-card-icon">✍️</div><div class="quick-card-label">콘티 짜기</div></div>
+          <div class="quick-card" title="주차별 찬양 기록을 확인해요" onclick="showPage('weekly',null)"><div class="quick-card-icon">📅</div><div class="quick-card-label">주차 기록</div></div>
+          <div class="quick-card" title="내 프로필과 설정을 관리해요" onclick="showPage('mypage',null)"><div class="quick-card-icon">👤</div><div class="quick-card-label">마이 페이지</div></div>
+          <div class="quick-card" title="여러 악보를 하나의 PDF로 합쳐요" onclick="showPage('merge',null)"><div class="quick-card-icon">📋</div><div class="quick-card-label">악보 합치기</div></div>
+        </div>
+
+        <!-- 설문 배너 -->
+        <div id="surveyBanner" style="margin-bottom:14px;background:linear-gradient(135deg,#EFF6FF,#EDE9FE);border:1px solid #BFDBFE;border-radius:14px;padding:14px 16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#1E40AF;margin-bottom:3px;">📋 워십매니저 개선 설문</div>
+              <div style="font-size:11px;color:#3B82F6;">여러분의 의견으로 더 좋은 앱을 만들어요!</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-sm" onclick="openModal('surveyModal')" style="background:#3B82F6;color:#fff;border-color:#3B82F6;font-size:11px;">찬양팀 설문</button>
+              <button class="btn btn-sm" onclick="openModal('broadcastSurveyModal')" style="background:#7C3AED;color:#fff;border-color:#7C3AED;font-size:11px;">방송실 설문</button>
+            </div>
+          </div>
         </div>
 
         <!-- 역할 안내 카드 -->
@@ -1062,9 +1142,10 @@ nav{flex:1;padding:4px 8px;overflow-y:auto;}
 
 <!-- MOBILE NAV -->
 <nav class="mobile-nav">
+  <button id="mobileBackBtn" class="mobile-nav-item" style="display:none;" onclick="goBack()"><span class="mobile-nav-icon">←</span><span class="mobile-nav-label">뒤로</span></button>
   <button class="mobile-nav-item active" onclick="showPage('dashboard',this)"><span class="mobile-nav-icon">🏠</span><span class="mobile-nav-label">홈</span></button>
   <button class="mobile-nav-item" onclick="showPage('weekly',this)"><span class="mobile-nav-icon">📅</span><span class="mobile-nav-label">주차</span></button>
-  <button class="mobile-nav-item" onclick="showPage('recommender',this)"><span class="mobile-nav-icon">🔮</span><span class="mobile-nav-label">추천기</span></button>
+  <button class="mobile-nav-item" onclick="showPage('library',this)"><span class="mobile-nav-icon">🎵</span><span class="mobile-nav-label">악보</span></button>
   <button class="mobile-nav-item" onclick="showPage('learning',this)"><span class="mobile-nav-icon">🎓</span><span class="mobile-nav-label">배움터</span></button>
   <button class="mobile-nav-item" onclick="toggleMobileMenu()"><span class="mobile-nav-icon">☰</span><span class="mobile-nav-label">더보기</span></button>
 </nav>
@@ -1192,7 +1273,7 @@ nav{flex:1;padding:4px 8px;overflow-y:auto;}
       </div>
 
       <div style="margin-top:16px;padding:10px 14px;background:#EEF2FF;border-radius:8px;font-size:11px;color:#4338CA;">
-        📮 기능 요청이나 버그는 <strong>대시보드 → 교회 신문고</strong>에 남겨주세요!
+        📮 기능 요청이나 버그는 <strong>대시보드 → 건의사항</strong>에 남겨주세요!
       </div>
     </div>
   </div>
@@ -1228,7 +1309,7 @@ nav{flex:1;padding:4px 8px;overflow-y:auto;}
     <div class="form-row">
       <div class="form-group"><label class="form-label">예배 날짜</label><input class="form-input" id="qcDate" type="date"/></div>
       <div class="form-group"><label class="form-label">예배 구분 (직접 입력)</label>
-        <select class="form-input" id="qcService">
+        <select class="form-select" id="qcService">
           <option value="">예배 구분 선택</option>
           <option value="주일 1부 예배">주일 1부 예배</option>
           <option value="주일 2부 예배">주일 2부 예배</option>
@@ -1272,7 +1353,7 @@ nav{flex:1;padding:4px 8px;overflow-y:auto;}
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">연습 시간</label><input class="form-input" id="wkPractice" type="time" placeholder="연습 시간 선택"/></div>
-      <div class="form-group"><label class="form-label">예배 시간</label><input class="form-input" id="wkServiceTime" type="time" value="09:00"/></div>
+      <div class="form-group"><label class="form-label">예배 시간</label><input class="form-input" id="wkServiceTime" type="time" value=""/></div>
     </div>
     <div class="form-group"><label class="form-label">설교 제목 / 말씀 배경</label><input class="form-input" id="wkTitle" placeholder="예) 여호수아의 과업"/></div>
     <div class="form-group"><label class="form-label">콘티 참고 영상 (유튜브)</label><input class="form-input" id="wkContiYt" placeholder="예배 흐름 참고 영상 링크 (선택사항)"/></div>
@@ -1443,11 +1524,11 @@ nav{flex:1;padding:4px 8px;overflow-y:auto;}
   </div>
 </div>
 
-<!-- 교회 신문고 모달 -->
+<!-- 건의사항 모달 -->
 <div class="modal-bg" id="suggestionModal" onclick="bgClose(event,'suggestionModal')">
   <div class="modal-box">
     <div class="modal-header">
-      <div class="modal-title">📮 교회 신문고</div>
+      <div class="modal-title">📮 건의사항</div>
       <button class="modal-close" onclick="closeModal('suggestionModal')">✕</button>
     </div>
     <div class="form-group">
@@ -1603,7 +1684,7 @@ nav{flex:1;padding:4px 8px;overflow-y:auto;}
     </div>
 
     <div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:12px;font-size:12px;color:#78350F;">
-      💡 기능 요청·버그는 <strong>대시보드 → 교회 신문고</strong>에 남겨주세요!
+      💡 기능 요청·버그는 <strong>대시보드 → 건의사항</strong>에 남겨주세요!
     </div>
   </div>
 </div>
@@ -1623,6 +1704,128 @@ nav{flex:1;padding:4px 8px;overflow-y:auto;}
 </div>
 
 <!-- TOAST -->
+
+<!-- 찬양팀 설문 모달 -->
+<div class="modal-bg" id="surveyModal" onclick="bgClose(event,'surveyModal')">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-header">
+      <div class="modal-title">📋 워십매니저 설문</div>
+      <button class="modal-close" onclick="closeModal('surveyModal')">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.7;background:var(--olive-bg);padding:10px 14px;border-radius:8px;">
+      🙏 더 좋은 워십매니저를 만들기 위한 설문이에요.<br>소중한 의견을 남겨주세요!
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">이름 *</label>
+      <input class="form-input" id="surveyName" placeholder="홍길동"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">이메일 *</label>
+      <input class="form-input" id="surveyEmail" type="email" placeholder="example@email.com"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">파트 / 역할</label>
+      <select class="form-select" id="surveyPart">
+        <option value="">선택해주세요</option>
+        <option value="찬양인도자">찬양인도자</option>
+        <option value="싱어">싱어</option>
+        <option value="일렉기타">일렉기타</option>
+        <option value="어쿠스틱기타">어쿠스틱기타</option>
+        <option value="베이스">베이스</option>
+        <option value="드럼">드럼</option>
+        <option value="피아노/키보드">피아노/키보드</option>
+        <option value="기타">기타</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">현재 워십매니저에서 가장 자주 쓰는 기능은?</label>
+      <select class="form-select" id="surveyMostUsed">
+        <option value="">선택해주세요</option>
+        <option value="악보 창고">악보 창고</option>
+        <option value="주차별 찬양">주차별 찬양</option>
+        <option value="콘티 짜기">콘티 짜기</option>
+        <option value="찬양 배움터">찬양 배움터</option>
+        <option value="Playlist">Playlist</option>
+        <option value="찬양 추천기">찬양 추천기</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">추가됐으면 하는 기능이 있나요?</label>
+      <div style="display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--cream);border-radius:8px;border:1px solid var(--border);">
+        ${['콘티 공유 기능 (카카오톡 등)','악보에 직접 메모/송폼 적기','악보 여러 개 합쳐서 PDF 출력','성경 구절 오프라인 저장','PPT 자동 생성','출석 체크 기능','악보 버전 관리','기타'].map(f=>`
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" name="surveyFeature" value="${f}" style="width:14px;height:14px;accent-color:var(--olive);"/> ${f}
+        </label>`).join('')}
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">기타 의견 (자유롭게)</label>
+      <textarea class="form-textarea" id="surveyComment" rows="3" placeholder="불편한 점, 개선 아이디어 등 자유롭게 적어주세요"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('surveyModal')">취소</button>
+      <button class="btn btn-primary" onclick="submitSurvey('member')">📋 제출하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 방송실 설문 모달 -->
+<div class="modal-bg" id="broadcastSurveyModal" onclick="bgClose(event,'broadcastSurveyModal')">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-header">
+      <div class="modal-title">📺 방송실 워십매니저 설문</div>
+      <button class="modal-close" onclick="closeModal('broadcastSurveyModal')">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.7;background:#EFF6FF;padding:10px 14px;border-radius:8px;border:1px solid #BFDBFE;">
+      📡 방송실 전용 워십매니저 개발을 위한 설문이에요.<br>현재 방송실 환경과 필요한 기능을 알려주세요!
+    </div>
+    <div class="form-group">
+      <label class="form-label">이름 *</label>
+      <input class="form-input" id="bsName" placeholder="홍길동"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">이메일 *</label>
+      <input class="form-input" id="bsEmail" type="email" placeholder="example@email.com"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">현재 방송실에서 사용하는 프로그램은?</label>
+      <div style="display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--cream);border-radius:8px;border:1px solid var(--border);">
+        ${['ProPresenter','EasyWorship','OpenLP','PowerPoint','Google Slides','자체 제작','없음','기타'].map(p=>`
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" name="bsProgram" value="${p}" style="width:14px;height:14px;accent-color:var(--olive);"/> ${p}
+        </label>`).join('')}
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">필요한 기능은? (복수 선택)</label>
+      <div style="display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--cream);border-radius:8px;border:1px solid var(--border);">
+        ${['콘티 기반 PPT 자동 생성','가사 자막 화면 출력','악보 화면 공유','성경 구절 자막','예배 순서 화면 표시','찬양 가사 슬라이드 자동 정렬','실시간 콘티 변경 알림','기타'].map(f=>`
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" name="bsFeature" value="${f}" style="width:14px;height:14px;accent-color:var(--olive);"/> ${f}
+        </label>`).join('')}
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">방송실 담당자가 몇 명인가요?</label>
+      <select class="form-select" id="bsTeamSize">
+        <option value="">선택</option>
+        <option value="1명">1명</option>
+        <option value="2명">2명</option>
+        <option value="3명 이상">3명 이상</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">가장 불편한 점 또는 꼭 필요한 기능</label>
+      <textarea class="form-textarea" id="bsComment" rows="3" placeholder="현재 방송 업무에서 가장 힘든 점이나 자동화됐으면 하는 것을 적어주세요"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('broadcastSurveyModal')">취소</button>
+      <button class="btn btn-primary" onclick="submitSurvey('broadcast')">📋 제출하기</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- 계정 생성 (어드민) -->
@@ -2136,6 +2339,188 @@ function applyChurchBranding() {
   }
 }
 
+// ════════════════════════════════════════════
+// 설문 제출 (구글 시트 연동)
+// ════════════════════════════════════════════
+// 찬양팀 설문 시트 URL (함께하는교회 탭)
+const SURVEY_SHEET_URL = 'https://docs.google.com/forms/d/e/'; // 폼 ID 입력 필요
+const MEMBER_SURVEY_SHEET = 'https://docs.google.com/spreadsheets/d/1Iw5WlS0Pg9uB4P5S7ZQxtDWr-5hY6PFW9Ii-fo-lFkA';
+
+async function submitSurvey(type) {
+  if (type === 'member') {
+    const name = document.getElementById('surveyName').value.trim();
+    const email = document.getElementById('surveyEmail').value.trim();
+    if (!name || !email) { showToast('이름과 이메일을 입력해주세요'); return; }
+
+    const part = document.getElementById('surveyPart').value;
+    const mostUsed = document.getElementById('surveyMostUsed').value;
+    const features = [...document.querySelectorAll('input[name="surveyFeature"]:checked')].map(cb => cb.value).join(', ');
+    const comment = document.getElementById('surveyComment').value;
+
+    // Supabase suggestions 테이블에 저장
+    try {
+      await sb.from('suggestions').insert({
+        user_id: currentUser?.id,
+        user_name: name,
+        category: 'survey_member',
+        content: `[찬양팀 설문]\n이름: ${name}\n이메일: ${email}\n파트: ${part}\n자주 쓰는 기능: ${mostUsed}\n희망 기능: ${features}\n기타 의견: ${comment}`,
+        church_id: currentUser?.church_id,
+        is_anon: false,
+      });
+      closeModal('surveyModal');
+      showToast('설문이 제출됐어요! 감사합니다 🙏');
+      // 슈퍼어드민 알림
+      await sendNotifToAdmins('📋 새 찬양팀 설문이 제출됐어요!', `${name}(${part}) 님이 설문을 제출했어요.`);
+    } catch(e) {
+      showToast('제출 중 오류가 발생했어요: ' + e.message);
+    }
+
+  } else if (type === 'broadcast') {
+    const name = document.getElementById('bsName').value.trim();
+    const email = document.getElementById('bsEmail').value.trim();
+    if (!name || !email) { showToast('이름과 이메일을 입력해주세요'); return; }
+
+    const programs = [...document.querySelectorAll('input[name="bsProgram"]:checked')].map(cb => cb.value).join(', ');
+    const features = [...document.querySelectorAll('input[name="bsFeature"]:checked')].map(cb => cb.value).join(', ');
+    const teamSize = document.getElementById('bsTeamSize').value;
+    const comment = document.getElementById('bsComment').value;
+
+    try {
+      await sb.from('suggestions').insert({
+        user_id: currentUser?.id,
+        user_name: name,
+        category: 'survey_broadcast',
+        content: `[방송실 설문]\n이름: ${name}\n이메일: ${email}\n사용 프로그램: ${programs}\n필요 기능: ${features}\n팀 규모: ${teamSize}\n기타 의견: ${comment}`,
+        church_id: currentUser?.church_id,
+        is_anon: false,
+      });
+      closeModal('broadcastSurveyModal');
+      showToast('방송실 설문이 제출됐어요! 감사합니다 🙏');
+      await sendNotifToAdmins('📺 새 방송실 설문이 제출됐어요!', `${name} 님이 방송실 설문을 제출했어요.`);
+    } catch(e) {
+      showToast('제출 중 오류가 발생했어요: ' + e.message);
+    }
+  }
+}
+
+async function sendNotifToAdmins(title, body) {
+  try {
+    const { data: admins } = await sb.from('profiles')
+      .select('id')
+      .in('role', ['super_admin', 'admin'])
+      .eq('church_id', currentUser?.church_id);
+    if (!admins?.length) return;
+    const notifs = admins.map(a => ({
+      user_id: a.id,
+      type: 'survey',
+      title,
+      body,
+      church_id: currentUser?.church_id,
+    }));
+    await sb.from('notifications').insert(notifs);
+  } catch(e) {}
+}
+
+// ════════════════════════════════════════════
+// 역할별 메뉴 필터링
+// ════════════════════════════════════════════
+function applyRoleBasedNav() {
+  const role = currentUser?.role || 'member';
+  const isLeader = role === 'super_admin' || role === 'admin' || role === 'worship_leader';
+  document.querySelectorAll('.nav-item[data-role="leader"]').forEach(btn => {
+    btn.style.display = isLeader ? 'flex' : 'none';
+  });
+  const mobileConti = document.querySelector('.mobile-nav-item[onclick*="conti"]');
+  if (mobileConti) mobileConti.style.display = isLeader ? 'flex' : 'none';
+}
+
+// ════════════════════════════════════════════
+// 악보 그룹핑 (같은 제목 → 버전 그룹)
+// ════════════════════════════════════════════
+function groupScores(scoreList) {
+  const groups = {};
+  scoreList.forEach(s => {
+    const key = s.title.trim().toLowerCase();
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(s);
+  });
+  return groups;
+}
+
+function renderScoreGrouped(filtered) {
+  const el = document.getElementById('scoreList');
+  if (!el) return;
+  if (!filtered.length) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;font-size:13px;color:var(--light);">악보가 없습니다.</div>';
+    return;
+  }
+  const groups = groupScores(filtered);
+  let html = '';
+  Object.entries(groups).forEach(([key, group]) => {
+    if (group.length === 1) {
+      html += renderScoreRowSingle(group[0]);
+    } else {
+      const gid = 'grp_' + Math.random().toString(36).slice(2,8);
+      html += `
+        <div class="score-group">
+          <div class="score-group-header" onclick="toggleScoreGroup('${gid}')">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:16px;">🎵</span>
+              <span class="score-group-title">${group[0].title}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="score-group-count">${group.length}개 버전</span>
+              <span id="${gid}_arrow" style="font-size:12px;color:var(--light);">▼</span>
+            </div>
+          </div>
+          <div class="score-group-body" id="${gid}">
+            ${group.map((s,i) => `
+              <div class="score-row" onclick="viewScore('${s.id}')">
+                <div style="width:22px;height:22px;border-radius:50%;background:var(--olive-bg);color:var(--olive-d);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div>
+                <div class="score-info">
+                  <div class="score-name">${s.artist||'버전 '+(i+1)}</div>
+                  <div class="score-sub">Key ${s.key||'-'} · ${s.lastEdit||'-'}</div>
+                </div>
+                <div class="score-actions" onclick="event.stopPropagation()">
+                  ${s.yt?`<a href="${s.yt}" target="_blank" class="yt-icon-btn"><svg viewBox="0 0 24 24" fill="white" width="12" height="12"><path d="M8 5v14l11-7z"/></svg></a>`:''}
+                  ${s.file?`<button class="btn btn-sm" onclick="viewScore('${s.id}')">악보</button>`:''}
+                  ${isAdmin()?`<button class="btn btn-sm" onclick="openEditScore('${s.id}')">✏️</button>`:''}
+                  ${(isAdmin()||s.uploadedBy===currentUser?.id)?`<button class="btn btn-danger btn-sm" onclick="deleteScore('${s.id}')">삭제</button>`:''}
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>`;
+    }
+  });
+  el.innerHTML = html + `<div style="text-align:center;padding:8px;font-size:11px;color:var(--light);">총 ${filtered.length}곡</div>`;
+  updateArtistFilter();
+}
+
+function toggleScoreGroup(gid) {
+  const body = document.getElementById(gid);
+  const arrow = document.getElementById(gid + '_arrow');
+  if (!body) return;
+  const isOpen = body.classList.toggle('open');
+  if (arrow) arrow.textContent = isOpen ? '▲' : '▼';
+}
+
+function renderScoreRowSingle(s) {
+  return `
+    <div class="score-row" onclick="viewScore('${s.id}')">
+      <div class="score-info">
+        <div class="score-name">${s.title} ${s.file?.type==='application/pdf'?'<span style="font-size:10px;background:#FEE2E2;color:#CC2200;padding:1px 5px;border-radius:4px;">PDF</span>':s.file?'<span style="font-size:10px;background:var(--olive-bg);color:var(--olive-d);padding:1px 5px;border-radius:4px;">IMG</span>':''}</div>
+        <div class="score-sub">${s.artist||'-'} · Key ${s.key||'-'} · ${s.lastEdit||'-'}</div>
+      </div>
+      <div class="score-actions" onclick="event.stopPropagation()">
+        ${s.yt?`<a href="${s.yt}" target="_blank" class="yt-icon-btn" title="유튜브 재생"><svg viewBox="0 0 24 24" fill="white" width="12" height="12"><path d="M8 5v14l11-7z"/></svg></a>`:''}
+        <button class="link-btn score btn-sm" title="악보 보기" onclick="viewScore('${s.id}')">악보</button>
+        ${s.file?`<button class="btn btn-sm" title="다운로드" onclick="downloadScore('${s.id}')">⬇️</button>`:''}
+        ${isAdmin()?`<button class="btn btn-sm" title="수정" onclick="openEditScore('${s.id}')">✏️</button>`:''}
+        ${(isAdmin()||s.uploadedBy===currentUser?.id)?`<button class="btn btn-danger btn-sm" title="삭제" onclick="deleteScore('${s.id}')">삭제</button>`:''}
+      </div>
+    </div>`;
+}
+
 const SUPABASE_URL = 'https://tdovjsqkquybktmedewu.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_O03HB6BfZzOe1tFYGDDVuw_KtJKNoSu';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -2256,8 +2641,10 @@ function updateUserUI() {
   else sa.textContent = initial;
   document.getElementById('sidebarName').textContent = currentUser.name;
   document.getElementById('sidebarRole').textContent = getRoleLabel(currentUser.role);
+  // ── 역할별 메뉴 필터링
+  applyRoleBasedNav();
   // admin features
-  if (isAdmin() || isWorshipLeader()) {
+  if (isAdmin()) {
     document.getElementById('annEditBtn').style.display = 'block';
     document.getElementById('quickContiBtn').style.display = 'flex';
     document.getElementById('weeklyAddBtn').style.display = 'flex';
@@ -2404,7 +2791,15 @@ function renderAll() {
 // ════════════════════════════════════════════
 // NAVIGATION
 // ════════════════════════════════════════════
+let _pageHistory = [];
+
 function showPage(id, btn) {
+  // 히스토리 스택 (모바일 뒤로가기용)
+  const current = document.querySelector('.page.active')?.id?.replace('page-','');
+  if (current && current !== id) {
+    _pageHistory.push(current);
+    if (_pageHistory.length > 10) _pageHistory.shift();
+  }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item,.mobile-nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
@@ -2419,6 +2814,26 @@ function showPage(id, btn) {
     loadMyAssignments().then(() => renderWeekly());
   }
   location.hash = id;
+  // 모바일 뒤로가기 버튼
+  const backBtn = document.getElementById('mobileBackBtn');
+  if (backBtn) backBtn.style.display = (window.innerWidth <= 768 && _pageHistory.length > 0) ? 'flex' : 'none';
+}
+
+function goBack() {
+  if (_pageHistory.length > 0) {
+    const prev = _pageHistory.pop();
+    // showPage 재귀 방지
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-item,.mobile-nav-item').forEach(n=>n.classList.remove('active'));
+    const el = document.getElementById('page-'+prev);
+    if (el) el.classList.add('active');
+    document.querySelectorAll('.nav-item,.mobile-nav-item').forEach(n=>{
+      if (n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+prev+"'")) n.classList.add('active');
+    });
+    location.hash = prev;
+    const backBtn = document.getElementById('mobileBackBtn');
+    if (backBtn) backBtn.style.display = (window.innerWidth <= 768 && _pageHistory.length > 0) ? 'flex' : 'none';
+  }
 }
 
 function restoreTab() {
@@ -2546,7 +2961,7 @@ function saveQuickConti() {
   updateAnnFromConti(entry);
   renderWeekly(); renderThisWeek();
   closeModal('quickContiModal');
-  showPage('weekly', null);
+  showPage('weekly', null); // 빠른 콘티 후 주차별 찬양으로 이동
   showToast('콘티가 등록되었습니다!');
   setTimeout(()=>showPage('weekly',null), 400);
 }
@@ -2989,42 +3404,9 @@ function renderScores(resetPage) {
     return;
   }
 
-  const totalPages = Math.ceil(filtered.length / SCORE_PAGE_SIZE);
-  const page = Math.min(window._scorePage, totalPages);
-  window._scorePage = page;
-  const start = (page-1) * SCORE_PAGE_SIZE;
-  const paged = filtered.slice(start, start + SCORE_PAGE_SIZE);
-
-  const scoreRows = paged.map(s=>`
-    <div class="score-row" onclick="viewScore('${s.id}')">
-      <div class="score-info">
-        <div class="score-name">${s.title} ${s.file?.type==='application/pdf'?'<span style="font-size:10px;background:#FEE2E2;color:#CC2200;padding:1px 5px;border-radius:4px;">PDF</span>':s.file?'<span style="font-size:10px;background:var(--olive-bg);color:var(--olive-d);padding:1px 5px;border-radius:4px;">IMG</span>':''}</div>
-        <div class="score-sub">${s.artist||'-'} · Key ${s.key||'-'} · ${s.lastEdit||'-'}</div>
-      </div>
-      <div class="score-actions" onclick="event.stopPropagation()">
-        ${s.yt?`<a href="${s.yt}" target="_blank" class="yt-icon-btn"><svg viewBox="0 0 24 24" fill="white" width="12" height="12"><path d="M8 5v14l11-7z"/></svg></a>`:''}
-        <button class="link-btn score btn-sm" onclick="viewScore('${s.id}')">악보</button>
-        ${s.file?`<button class="btn btn-sm" onclick="downloadScore('${s.id}')">⬇️</button>`:''}
-        ${isAdmin()?`<button class="btn btn-sm" onclick="openEditScore('${s.id}')">✏️</button>`:''}
-        ${(isAdmin() || s.uploadedBy === currentUser?.id)?`<button class="btn btn-danger btn-sm" onclick="deleteScore('${s.id}')">삭제</button>`:''}
-      </div>
-    </div>`).join('');
-
-  // 페이지네이션 UI
-  const pagination = totalPages > 1 ? `
-    <div style="display:flex;align-items:center;justify-content:center;gap:6px;padding:16px 0;flex-wrap:wrap;">
-      <button class="btn btn-sm" onclick="goScorePage(1)" ${page===1?'disabled':''} style="font-size:11px;">«</button>
-      <button class="btn btn-sm" onclick="goScorePage(${page-1})" ${page===1?'disabled':''} style="font-size:11px;">‹ 이전</button>
-      ${Array.from({length:totalPages},(_, i)=>i+1).filter(p=>Math.abs(p-page)<=2).map(p=>`
-        <button class="btn btn-sm" onclick="goScorePage(${p})" style="font-size:11px;${p===page?'background:var(--olive);color:#fff;border-color:var(--olive);':''}">
-          ${p}
-        </button>`).join('')}
-      <button class="btn btn-sm" onclick="goScorePage(${page+1})" ${page===totalPages?'disabled':''} style="font-size:11px;">다음 ›</button>
-      <button class="btn btn-sm" onclick="goScorePage(${totalPages})" ${page===totalPages?'disabled':''} style="font-size:11px;">»</button>
-      <span style="font-size:11px;color:var(--muted);margin-left:4px;">${start+1}–${Math.min(start+SCORE_PAGE_SIZE, filtered.length)} / 총 ${filtered.length}곡</span>
-    </div>` : `<div style="text-align:center;padding:8px;font-size:11px;color:var(--light);">총 ${filtered.length}곡</div>`;
-
-  el.innerHTML = scoreRows + pagination;
+  // 그룹핑 렌더링
+  renderScoreGrouped(filtered);
+  updateArtistFilter();
 }
 
 function goScorePage(page) {
@@ -4884,50 +5266,48 @@ function renderDevNote() {
   const card = document.getElementById('devNoteCard');
   if (!card) return;
 
-  // 오송생명교회 — 사용 가이드 안내문
+  // 기본 Dev Note — 배포 시 자동 설정
+  card.style.background = 'linear-gradient(135deg,#ECFDF5,#F0FDF4)';
+  card.style.border = '1px solid #6EE7B7';
   const DEFAULT_NOTE = {
     version: '사용 가이드',
     content: `안녕하세요! 오송생명교회 워십매니저입니다 🙏
 
-📖 사용 순서
-
 🎵 Step 1 — 악보 창고 채우기
-찬양팀이 자주 사용하는 악보를 등록해요.
-악보 창고 → + 악보 추가 → 파일(PDF/이미지) + 곡명 + Key 입력 후 저장
+악보 창고 → + 악보 추가 → 파일 + 곡명 + Key 입력 후 저장
 
 ✍️ Step 2 — 콘티 짜기
-등록한 악보로 이번 주 콘티를 구성해요.
 빠른 콘티 짜기 → 악보 클릭해서 추가 → 저장하면 주차별 찬양에 자동 등록
 
 📅 Step 3 — 주차별 찬양 확인
-주차별 찬양 탭에서 등록된 콘티를 팀원에게 할당할 수 있어요.
-카드 우측 상단 📤 버튼으로 팀원에게 알림 전송
+카드 우측 📤 버튼으로 팀원에게 알림 전송
 
 👥 Step 4 — 팀원 초대
-멤버 관리 → 계정 생성에서 팀원 계정을 만들어주세요.
-이메일 + 임시 비밀번호를 전달하면 바로 사용 가능해요!
+멤버 관리 → 계정 생성 → 이메일 + 임시 비밀번호 전달
 
-📮 교회 신문고
-건의사항이나 기능 요청은 교회 신문고에 남겨주세요.
-관리자가 확인 후 답변드려요.
-
-⭐ 자주 쓰는 기능
+⭐ 유용한 기능
 • 초성 검색 — ㄴㅇㅈ 로 "나의 주" 검색 가능
-• 악보 뷰어 — 악보 클릭 시 전체화면으로 볼 수 있어요
-• Playlist — 자주 쓰는 악보 모음 폴더 만들기`,
-    updatedAt: '2026-05-16'
+• 같은 제목 악보 → 버전별 그룹으로 자동 묶임
+• Playlist — 자주 쓰는 악보 모음 폴더 만들기
+
+📮 건의사항은 대시보드 → 건의사항에 남겨주세요 😊`,
+    updatedAt: '2026-05-10'
   };
 
-  card.style.display = 'block';
-  card.style.background = 'linear-gradient(135deg,#ECFDF5,#F0FDF4)';
-  card.style.border = '1px solid #6EE7B7';
+  let note = JSON.parse(localStorage.getItem('wm_devnote')||'null');
+  // 저장된 노트가 없거나 버전이 다르면 기본값 사용
+  if (!note || note.version !== DEFAULT_NOTE.version) {
+    note = DEFAULT_NOTE;
+    localStorage.setItem('wm_devnote', JSON.stringify(note));
+  }
 
+  card.style.display = 'block';
   const verEl = document.getElementById('devNoteVersion');
   const contentEl = document.getElementById('devNoteContent');
-  if (verEl) { verEl.textContent = DEFAULT_NOTE.version; verEl.style.background='#6EE7B7'; verEl.style.color='#065F46'; }
-  if (contentEl) { contentEl.textContent = DEFAULT_NOTE.content; contentEl.style.color='#065F46'; }
+  if (verEl) verEl.textContent = note.version||'';
+  if (contentEl) contentEl.textContent = note.content;
 
-  // 관리자만 편집 버튼 표시
+  // 어드민 편집 버튼
   const editBtn = card.querySelector('button');
   if (editBtn) editBtn.style.display = isAdmin() ? 'block' : 'none';
 }
@@ -5001,7 +5381,7 @@ function updateLearningStatus(id,status) { const item=(window._learningCache||[]
 function deleteLearning(id) { if(!confirm('삭제할까요?'))return; window._learningCache=(window._learningCache||[]).filter(x=>x.id!==id); deleteLearningFromSupabase(id); renderLearning(); }
 
 // ════════════════════════════════════════════
-// 교회 신문고
+// 건의사항
 // ════════════════════════════════════════════
 function openSuggestion() {
   document.getElementById('suggContent').value = '';
@@ -5034,7 +5414,7 @@ async function submitSuggestion() {
         admins.map(a => ({
           user_id: a.id,
           type: 'suggestion',
-          title: `📮 새 신문고 글이 올라왔어요!`,
+          title: `📮 새 건의사항 글이 올라왔어요!`,
           body: `[${catLabel}] ${authorLabel}: ${content.slice(0,40)}${content.length>40?'...':''}`,
           data: { suggestion_id: inserted?.id },
           is_read: false
@@ -5625,7 +6005,8 @@ function updateDday() {
 // ════════════════════════════════════════════
 let _allChurches = [];
 let _editingChurchId = null;
-const SHEET_CSV_URL = '';
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Iw5WlS0Pg9uB4P5S7ZQxtDWr-5hY6PFW9Ii-fo-lFkA/export?format=csv&gid=876261369';
+const SHEET_CSV_URL_PROXY_DISABLED = `https://corsproxy.io/?${encodeURIComponent(SHEET_CSV_URL)}`;
 
 // 교회 통계 로드
 async function loadChurchStats() {
@@ -5689,7 +6070,7 @@ async function loadSheetApplications() {
   if (!el) return;
   el.innerHTML = '<div style="text-align:center;padding:16px;font-size:13px;color:#B45309;">불러오는 중... ⏳</div>';
   try {
-    const res = await fetch(SHEET_CSV_URL);
+    const res = await fetch(SHEET_CSV_URL_PROXY);
     const csv = await res.text();
     const rows = csv.trim().split('\n').slice(1); // 헤더 제외
     if (!rows.length || (rows.length === 1 && !rows[0].trim())) {
@@ -6094,7 +6475,7 @@ const ONBOARDING_STEPS = [
   {
     id: 'done',
     title: '✅ 준비 완료!',
-    desc: '이제 워십매니저를 자유롭게 사용해보세요 🎶\n궁금한 점은 대시보드 → 교회 신문고에 남겨주세요!',
+    desc: '이제 워십매니저를 자유롭게 사용해보세요 🎶\n궁금한 점은 대시보드 → 건의사항에 남겨주세요!',
     target: null,
     page: null,
     position: 'center',
